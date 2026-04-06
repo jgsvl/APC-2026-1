@@ -1,3 +1,7 @@
+# Semana 3
+Programa que, dado a entrada do usuário, retorna uma lista de números inteiros naturais, de zero até o número definido pelo usuário.  
+Este programa roda nos simuldores LMC (Little Man Computer).
+
 ```asm
         INP
         STA limite     
