@@ -1,49 +1,43 @@
-def selection_sort_ranking(lista_dados):
-    """
-    Ordena uma lista de tuplas [(RA, valor), ...] de forma decrescente pelo valor.
-    """
-    n = len(lista_dados)
-    # Transforma em lista de listas para permitir mutabilidade (troca de posições)
-    dados = [list(item) for item in lista_dados]
-    
-    for i in range(n):
-        max_idx = i
-        for j in range(i + 1, n):
-            # Compara o segundo elemento da tupla (o percentual numérico)
-            if dados[j][1] > dados[max_idx][1]:
-                max_idx = j
-        
-        # Realiza o swap (troca) das posições
-        dados[i], dados[max_idx] = dados[max_idx], dados[i]
-        
-    return dados
+import pandas as pd
 
-def gerar_ranking_escolaridade(df):
-    """Gera um ranking bruto das RAs pelo % de pessoas com Ensino Superior+."""
-    ranking = []
-    # Pega todas as RAs, exceto "Todas" e "Outra"
-    ras = [ra for ra in df['nome_ra'].unique() if ra not in ["Todas", "Outra"]]
-    
-    for ra in ras:
-        df_ra = df[df['nome_ra'] == ra]
-        total = len(df_ra)
-        if total > 0:
-            # Códigos 7 (Superior) e 8 (Pós/Mestrado/Doutorado)
-            qtd_sup = len(df_ra[df_ra['escolaridade'] >= 7])
-            percentual = (qtd_sup / total) * 100
-            ranking.append((ra, percentual))
-            
-    return ranking
-
-def obter_distribuicao_genero(df_filtrado):
-    """Prepara os dados de gênero para o segundo gráfico."""
-    if df_filtrado.empty:
-        return pd.Series(dtype=int)
+def calcular_estatisticas_ra(df, ra_selecionada):
+    """Calcula total, média e mediana de idade para a RA especificada."""
+    if ra_selecionada != "Todas" and ra_selecionada != "Nenhuma":
+        df = df[df['nome_ra'] == ra_selecionada]
         
-    # Considerando 1 = Masculino, 2 = Feminino no dicionário do PDAD
+    total_pessoas = len(df)
+    if total_pessoas == 0:
+        return 0, 0.0, 0.0
+        
+    idade_media = df['idade_calculada'].mean()
+    idade_mediana = df['idade_calculada'].median()
+    
+    return total_pessoas, idade_media, idade_mediana
+
+def obter_distribuicao_escolaridade(df, ra_selecionada):
+    """Retorna a série com a contagem de escolaridade para uma RA (Para o Gráfico de Barras)."""
+    if ra_selecionada != "Todas" and ra_selecionada != "Nenhuma":
+        df = df[df['nome_ra'] == ra_selecionada]
+        
+    mapa_escolaridade = {
+        1: "Sem instrução", 2: "Fund. Incomp.", 3: "Fund. Comp.",
+        4: "Médio Incomp.", 5: "Médio Comp.", 6: "Sup. Incomp.", 7: "Sup. Comp."
+    }
+    
+    contagem = df['escolaridade'].value_counts().sort_index()
+    contagem.index = contagem.index.map(mapa_escolaridade).fillna("Outros")
+    
+    return contagem
+
+def obter_distribuicao_genero(df, ra_selecionada):
+    """Retorna a contagem de gênero para uma RA (Para o Gráfico de Pizza)."""
+    if ra_selecionada != "Todas" and ra_selecionada != "Nenhuma":
+        df = df[df['nome_ra'] == ra_selecionada]
+        
+    # Códigos 1 e 2 baseados na variável E03 do dicionário
     mapa_genero = {1.0: "Masculino", 2.0: "Feminino"}
     
-    df_genero = df_filtrado.copy()
+    df_genero = df.copy()
     df_genero['desc_genero'] = df_genero['id_genero'].map(mapa_genero).fillna("Outro")
     
     return df_genero['desc_genero'].value_counts()
