@@ -31,15 +31,23 @@ abas = ttk.Notebook(root)
 abas.pack(fill="both", expand=True)
 
 
-# Cria as duas abas internas
+# Cria três abas internas
 tab_graficos = tk.Frame(abas)
 tab_info = tk.Frame(abas)
+tab_sobre = tk.Frame(abas)
+
 abas.add(tab_graficos, text="Gráficos")
 abas.add(tab_info, text="Informações do Recorte")
+abas.add(tab_sobre, text="Sobre")
 
 # Textos para a aba de informações
 tk.Label(tab_info, text="Recorte A - Escolaridade", font=("Arial", 16, "bold")).pack(pady=20)
 tk.Label(tab_info, text=f"Total de registros filtrados: {len(df_moradores)} moradores.").pack()
+
+# Textos para a aba Sobre (Identificação do Aluno)
+tk.Label(tab_sobre, text="Disciplina: APC 2026/1 turma 07", font=("Arial", 16, "bold")).pack(pady=(40, 10))
+tk.Label(tab_sobre, text="Aluno: João Gabriel da Silva Vidal", font=("Arial", 14)).pack(pady=5)
+tk.Label(tab_sobre, text="Matrícula: 202053321", font=("Arial", 14)).pack(pady=5)
 
 # filtros e textos da aba principal, de gráficos
 frame_top = tk.Frame(tab_graficos)
