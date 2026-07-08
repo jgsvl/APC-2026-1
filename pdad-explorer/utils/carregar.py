@@ -43,4 +43,4 @@ def carregar_dados():
     moradores_limpo['nome_ra'] = moradores_limpo['localidade'].map(mapa_ra).fillna("Outra Localidade")
     
     # Retorna nossa base de dados limpa
-    return moradores_limpo, 
+    return moradores_limpo, domicilios

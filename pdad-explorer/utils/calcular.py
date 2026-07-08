@@ -1,43 +1,74 @@
 import pandas as pd
 
-def calcular_estatisticas_ra(df, ra_selecionada):
-    """Calcula total, média e mediana de idade para a RA especificada."""
-    if ra_selecionada != "Todas" and ra_selecionada != "Nenhuma":
-        df = df[df['nome_ra'] == ra_selecionada]
-        
-    total_pessoas = len(df)
-    if total_pessoas == 0:
-        return 0, 0.0, 0.0
-        
-    idade_media = df['idade_calculada'].mean()
-    idade_mediana = df['idade_calculada'].median()
+def filtrar_ra(df, ra):
+    """
+    Função auxiliar que filtra a base de dados pela Região Administrativa (RA) escolhida.
+    """
+    # Se a opção selecionada for "Todas", o sistema retorna a base de dados completa, sem cortes.
+    if ra == "Todas":
+        return df
     
-    return total_pessoas, idade_media, idade_mediana
+    # Caso contrário, aplica a máscara booleana para trazer só a RA solicitada.
+    return df[df['nome_ra'] == ra]
 
-def obter_distribuicao_escolaridade(df, ra_selecionada):
-    """Retorna a série com a contagem de escolaridade para uma RA (Para o Gráfico de Barras)."""
-    if ra_selecionada != "Todas" and ra_selecionada != "Nenhuma":
-        df = df[df['nome_ra'] == ra_selecionada]
+def calcular_stats(df, ra):
+    """
+    Calcula as estatísticas numéricas exigidas no Requisito 4 do projeto.
+    """
+    df_ra = filtrar_ra(df, ra)
+    
+    # Trava de segurança: se o filtro não encontrar ninguém, retorna zero, para não ocorrer / por zero.
+    if len(df_ra) == 0: 
+        return 0, 0.0
         
-    mapa_escolaridade = {
-        1: "Sem instrução", 2: "Fund. Incomp.", 3: "Fund. Comp.",
-        4: "Médio Incomp.", 5: "Médio Comp.", 6: "Sup. Incomp.", 7: "Sup. Comp."
+    total_pessoas = len(df_ra)
+    media_idade = df_ra['idade_calculada'].mean()
+    
+    return total_pessoas, media_idade
+
+def preparar_graficos(df, ra1, ra2):
+    """
+    Prepara e contabiliza os dados que serão injetados no Matplotlib.
+    """
+    # 1. SEPARAÇÃO DOS DADOS
+    df1 = filtrar_ra(df, ra1)
+    
+    if ra2 == "Nenhuma":
+        df2 = pd.DataFrame()
+    else:
+        df2 = filtrar_ra(df, ra2)
+    
+    # 2. PREPARAÇÃO DAS BARRAS (Diferencial 2 - Escolaridade)
+    # .value_counts() soma quantas vezes cada nível de escolaridade aparece
+    barras = pd.DataFrame({ra1: df1['escolaridade'].value_counts()})
+    
+    # Adiciona a segunda RA lado a lado, se ela existir
+    if not df2.empty:
+        barras[ra2] = df2['escolaridade'].value_counts()
+        
+    # Mapeamento com os valores exatos do Dicionário do PDAD
+    mapa_escola = {
+        1: "Sem instrução", 
+        2: "Fund. Incompleto", 
+        3: "Fund. Completo",
+        4: "Médio Incompleto", 
+        5: "Médio Completo", 
+        6: "Sup. Incompleto", 
+        7: "Sup. Completo", 
+        8: "Sem classificação"
     }
-    
-    contagem = df['escolaridade'].value_counts().sort_index()
-    contagem.index = contagem.index.map(mapa_escolaridade).fillna("Outros")
-    
-    return contagem
-
-def obter_distribuicao_genero(df, ra_selecionada):
-    """Retorna a contagem de gênero para uma RA (Para o Gráfico de Pizza)."""
-    if ra_selecionada != "Todas" and ra_selecionada != "Nenhuma":
-        df = df[df['nome_ra'] == ra_selecionada]
+    # Substitui os números (1 a 8) pelos textos. O que fugir disso vira "Outros"
+    barras.index = barras.index.map(mapa_escola).fillna("Outros")
         
-    # Códigos 1 e 2 baseados na variável E03 do dicionário
-    mapa_genero = {1.0: "Masculino", 2.0: "Feminino"}
+    # 3. PREPARAÇÃO DA PIZZA (Diferencial 1 - Gênero)
+    pizza = df1['id_genero'].value_counts()
     
-    df_genero = df.copy()
-    df_genero['desc_genero'] = df_genero['id_genero'].map(mapa_genero).fillna("Outro")
+    # Mapeamento com os valores exatos de Gênero do PDAD
+    mapa_genero = {
+        1.0: "Cisgênero", 
+        2.0: "Transgênero", 
+        3.0: "Outro"
+    }
+    pizza.index = pizza.index.map(mapa_genero).fillna("Outro")
     
-    return df_genero['desc_genero'].value_counts()
+    return barras, pizza
