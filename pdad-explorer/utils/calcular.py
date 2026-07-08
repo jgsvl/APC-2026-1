@@ -2,7 +2,7 @@ import pandas as pd
 
 def filtrar_ra(df, ra):
     """
-    Função auxiliar que filtra a base de dados pela Região Administrativa (RA) escolhida.
+    Função que filtra a base de dados pela Região Administrativa (RA) escolhida.
     """
     # Se a opção selecionada for "Todas", o sistema retorna a base de dados completa, sem cortes.
     if ra == "Todas":
@@ -30,18 +30,20 @@ def preparar_graficos(df, ra1, ra2):
     """
     Prepara e contabiliza os dados que serão injetados no Matplotlib.
     """
-    # 1. SEPARAÇÃO DOS DADOS
+    # filtra os dataframes de acordo com as RAs escolhidas
     df1 = filtrar_ra(df, ra1)
     
+    # se não houver segunda RA, cria um dataframe vazio
     if ra2 == "Nenhuma":
         df2 = pd.DataFrame()
     else:
         df2 = filtrar_ra(df, ra2)
     
-    # 2. PREPARAÇÃO DAS BARRAS (Diferencial 2 - Escolaridade)
+    # preparacão da barra de escolaridade
     # .value_counts() soma quantas vezes cada nível de escolaridade aparece
     barras = pd.DataFrame({ra1: df1['escolaridade'].value_counts()})
     
+
     # Adiciona a segunda RA lado a lado, se ela existir
     if not df2.empty:
         barras[ra2] = df2['escolaridade'].value_counts()
@@ -57,18 +59,21 @@ def preparar_graficos(df, ra1, ra2):
         7: "Sup. Completo", 
         8: "Sem classificação"
     }
-    # Substitui os números (1 a 8) pelos textos. O que fugir disso vira "Outros"
+    # Substitui os números (1 a 8) pelos textos. O que fugir disso vira "Outros". Só por segurança, mas não deve acontecer.
     barras.index = barras.index.map(mapa_escola).fillna("Outros")
         
-    # 3. PREPARAÇÃO DA PIZZA (Diferencial 1 - Gênero)
+    # preparação da pizza de gênero, para termos dois gráficos diferentes na tela
+    # value_counts() soma quantas vezes cada gênero aparece
     pizza = df1['id_genero'].value_counts()
     
     # Mapeamento com os valores exatos de Gênero do PDAD
     mapa_genero = {
-        1.0: "Cisgênero", 
-        2.0: "Transgênero", 
-        3.0: "Outro"
+        1: "Cisgênero", 
+        2: "Transgênero", 
+        3: "Outro"
     }
+
+    # Substitui os números (1 a 3) pelos textos. O que fugir disso vira "Outro". Só por segurança, mas não deve acontecer.
     pizza.index = pizza.index.map(mapa_genero).fillna("Outro")
     
     return barras, pizza

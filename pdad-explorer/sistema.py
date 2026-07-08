@@ -7,39 +7,41 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg # Conecta o grá
 from utils.carregar import carregar_dados
 from utils.calcular import calcular_stats, preparar_graficos
 
-# =============================================================================
-# 1. CARGA DE DADOS INICIAL
-# =============================================================================
+
 # Lê os arquivos e salva o dataframe pronto.
 df_moradores, df_domicilios = carregar_dados()
 
 # Cria a lista de opções para a caixa suspensa (ordenada alfabeticamente)
+# pega as RAs sem repetição, do próprio dataframe dos moradores, e adiciona a opção "Todas" no início da lista
+# .unique() ignora os valores duplicados
+# .sorted() ordena alfabeticamente
 opcoes_ra = ["Todas"] + sorted(list(df_moradores['nome_ra'].unique()))
 
-# =============================================================================
-# 2. CONSTRUÇÃO DA JANELA PRINCIPAL (Requisito 1)
-# =============================================================================
+# constroi a janela principal
 root = tk.Tk()
-root.title("Explorador PDAD - Escolaridade no DF")
+root.title("Explorador PDAD - Perfil educacional por Região Administrativa")
 root.geometry("950x650") # Largura x Altura
 
 # Cria o sistema de abas e expande para ocupar a tela toda
+# ttk.Notebook() é o widget que cria abas internas e coloca no root, que é a janela principal
 abas = ttk.Notebook(root)
+
+# fill="both" faz com que ele ocupe toda a largura e altura da janela
+# expand=True faz com que ele se expanda quando a janela for redimensionada
 abas.pack(fill="both", expand=True)
+
 
 # Cria as duas abas internas
 tab_graficos = tk.Frame(abas)
 tab_info = tk.Frame(abas)
-abas.add(tab_graficos, text="Dashboard Analítico")
+abas.add(tab_graficos, text="Gráficos")
 abas.add(tab_info, text="Informações do Recorte")
 
-# Textos simples para a aba de informações
+# Textos para a aba de informações
 tk.Label(tab_info, text="Recorte A - Escolaridade", font=("Arial", 16, "bold")).pack(pady=20)
 tk.Label(tab_info, text=f"Total de registros filtrados: {len(df_moradores)} moradores.").pack()
 
-# =============================================================================
-# 3. FILTROS E TEXTOS DA ABA PRINCIPAL (Requisitos 2 e 4)
-# =============================================================================
+# filtros e textos da aba principal, de gráficos
 frame_top = tk.Frame(tab_graficos)
 frame_top.pack(pady=10)
 
@@ -49,8 +51,8 @@ ra1_var = ttk.Combobox(frame_top, values=opcoes_ra, state="readonly", width=20)
 ra1_var.set("Todas")
 ra1_var.pack(side="left", padx=5)
 
-# Filtro 2: Região para Comparação (Diferencial 2)
-tk.Label(frame_top, text="vs Comparar com:").pack(side="left", padx=(20,0))
+# Filtro 2: Região para Comparação
+tk.Label(frame_top, text="Comparar com:").pack(side="left", padx=(20,0))
 ra2_var = ttk.Combobox(frame_top, values=["Nenhuma"] + opcoes_ra, state="readonly", width=20)
 ra2_var.set("Nenhuma")
 ra2_var.pack(side="left", padx=5)
@@ -60,15 +62,15 @@ lbl_stats = tk.Label(tab_graficos, text="", font=("Courier", 11, "bold"), fg="#3
 lbl_stats.pack(pady=10)
 
 # Frame que vai segurar os desenhos do Matplotlib
+# frames são necessários para organizar os widgets dentro da janela do Tkinter, e não haver conflito de posicionamento
 frame_grafico = tk.Frame(tab_graficos)
 frame_grafico.pack(fill="both", expand=True, padx=10, pady=5)
 
 # Variável de controle do gráfico atual na tela
+# isso é necessário para apagar o gráfico antigo antes de desenhar o novo, evitando sobreposição
 canvas_atual = None
 
-# =============================================================================
-# 4. FUNÇÃO DE ATUALIZAÇÃO (Requisito 3)
-# =============================================================================
+# função de atualização da tela, que é chamada sempre que o usuário muda algum filtro
 def atualizar():
     """Lê os filtros, refaz as contas e redesenha a tela toda vez que o usuário interage."""
     global canvas_atual
@@ -77,12 +79,12 @@ def atualizar():
     r1 = ra1_var.get()
     r2 = ra2_var.get()
     
-    # Impede que o usuário compare "Gama" com "Gama", por exemplo
+    # Impede que o usuário escolha a mesma RA para os dois filtros, pois isso não faz sentido
     if r1 == r2: 
         r2 = "Nenhuma"
         ra2_var.set("Nenhuma")
 
-    # --- PARTE 1: ATUALIZA TEXTOS (Requisito 4) ---
+    # atualiza texto
     t1, med1 = calcular_stats(df_moradores, r1)
     texto = f"[{r1}] -> Total: {t1} adultos | Média Idade: {med1:.1f} anos"
     
@@ -92,11 +94,11 @@ def atualizar():
         
     lbl_stats.config(text=texto)
 
-    # --- PARTE 2: ATUALIZA GRÁFICOS (Diferenciais 1 e 2) ---
+    # atualiza gráficos
     if canvas_atual:
         canvas_atual.get_tk_widget().destroy() # Apaga o gráfico velho
         
-    # Puxa os dados traduzidos lá do nosso módulo calcular.py
+    # Puxa os dados traduzidos do calcular.py
     barras, pizza = preparar_graficos(df_moradores, r1, r2)
     
     # Cria os dois espaços de gráfico (1 linha, 2 colunas). O de barras fica mais largo (2 para 1)
@@ -121,10 +123,11 @@ def atualizar():
     canvas_atual.draw()
     canvas_atual.get_tk_widget().pack(fill="both", expand=True)
 
-# =============================================================================
-# 5. EXECUÇÃO
-# =============================================================================
+# execução inicial do programa, para desenhar a tela com os filtros padrão
 # Diz para as Combobox dispararem a função atualizar() sempre que forem alteradas
+# isso é necessário para que o usuário veja os gráficos mudarem em tempo real, sem precisar apertar nenhum botão
+# lambda e: atualizar() é uma função anônima que chama atualizar() sem argumentos, pois o bind passa um evento como argumento
+# semelhante a classes anonomas e lambdas (->) do Java
 ra1_var.bind("<<ComboboxSelected>>", lambda e: atualizar())
 ra2_var.bind("<<ComboboxSelected>>", lambda e: atualizar())
 
