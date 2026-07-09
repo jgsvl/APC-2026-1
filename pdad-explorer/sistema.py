@@ -6,7 +6,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg # Conecta o grá
 # Importa as nossas próprias funções criadas na pasta utils
 from utils.carregar import carregar_dados
 from utils.calcular import calcular_stats, preparar_graficos
-
+from utils.exportar import exportar_relatorio
 
 # Lê os arquivos e salva o dataframe pronto.
 df_moradores, df_domicilios = carregar_dados()
@@ -68,6 +68,14 @@ ra2_var.pack(side="left", padx=5)
 # Área onde os números das estatísticas vão aparecer
 lbl_stats = tk.Label(tab_graficos, text="", font=("Courier", 11, "bold"), fg="#333333")
 lbl_stats.pack(pady=10)
+
+# botão de exportar relatório, que chama a função exportar_relatorio() do exportar.py
+btn_exportar = tk.Button(
+    tab_graficos, 
+    text="Exportar Relatório (.txt)", 
+    command=lambda: exportar_relatorio(df_moradores, ra1_var.get(), ra2_var.get(), lbl_stats.cget("text"))
+)
+btn_exportar.pack(pady=5)
 
 # Frame que vai segurar os desenhos do Matplotlib
 # frames são necessários para organizar os widgets dentro da janela do Tkinter, e não haver conflito de posicionamento
