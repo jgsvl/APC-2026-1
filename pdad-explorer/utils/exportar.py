@@ -29,3 +29,31 @@ def exportar_relatorio(df, ra1, ra2, texto_stats):
         
         # Mostra a mensagem de sucesso usando o messagebox padrão do tkinter
         messagebox.showinfo("Sucesso", "Relatório exportado com sucesso!")
+
+
+def exportar_csv_filtrado(df_filtrado, ra):
+    """
+    Exporta os registros de moradores já filtrados pela RA selecionada para um arquivo .csv.
+    """
+    # Trava de segurança: se o filtro não trouxe nenhum morador, não faz sentido abrir o diálogo de salvar
+    if len(df_filtrado) == 0:
+        messagebox.showwarning("Aviso", "Não há registros para exportar com esse filtro.")
+        return
+
+    # Sugere um nome de arquivo já com a RA no nome (ex: moradores_Varjão.csv), trocando
+    # espaços por "_" para o nome do arquivo ficar mais limpo
+    nome_sugerido = f"moradores_{ra}.csv".replace(" ", "_")
+
+    arquivo = filedialog.asksaveasfilename(
+        defaultextension=".csv",
+        filetypes=[("Arquivo CSV", "*.csv")],
+        title="Salvar CSV Filtrado",
+        initialfile=nome_sugerido
+    )
+
+    if arquivo != "":
+        # sep=";" e decimal="," mantêm o mesmo formato do arquivo original do PDAD,
+        # para o CSV exportado poder ser reaberto (ou reimportado no sistema) sem estranhezas
+        df_filtrado.to_csv(arquivo, sep=";", decimal=",", index=False, encoding="utf-8")
+
+        messagebox.showinfo("Sucesso", f"CSV com {len(df_filtrado)} registros exportado com sucesso!")

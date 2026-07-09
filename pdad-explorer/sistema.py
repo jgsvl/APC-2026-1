@@ -1,5 +1,5 @@
-import logging # necessário para exibir mensagens de log no console, ao invés de usar print() espalhados pelo código
-import sys # necessário para encerrar o programa com sys.exit() caso o usuário feche a tela de seleção de arquivos sem escolher nada
+import logging
+import sys
 import tkinter as tk # Biblioteca base para a interface gráfica
 from tkinter import ttk # Widgets mais modernos (abas, combobox)
 from tkinter import filedialog # Diálogo de seleção de arquivos (Requisito de upload via GUI)
@@ -8,8 +8,8 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg # Conecta o grá
 
 # Importa as nossas próprias funções criadas na pasta utils
 from utils.carregar import carregar_dados
-from utils.calcular import calcular_stats, preparar_graficos, calcular_acesso_internet
-from utils.exportar import exportar_relatorio
+from utils.calcular import calcular_stats, preparar_graficos, calcular_acesso_internet, filtrar_ra
+from utils.exportar import exportar_relatorio, exportar_csv_filtrado
 
 # configura o logging para exibir mensagens de informação no console, ao invés de usar print() espalhados pelo código
 logging.basicConfig(
@@ -20,8 +20,8 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
-# Mensagem de boas-vindas no console, usando ASCII art.
-#  o "r" antes da string indica que é uma raw string, então não precisamos escapar as barras invertidas.
+# Mensagem de boas-vindas no console, usando ASCII art. o "r" antes da 
+# string indica que é uma raw string, então não precisamos escapar as barras invertidas.
 print(r"""
      ____.                       ________      ___.         .__       .__   
     |    | _________    ____    /  _____/_____ \_ |_________|__| ____ |  |  
@@ -198,6 +198,15 @@ btn_exportar = tk.Button(
     command=lambda: exportar_relatorio(df_moradores, ra1_var.get(), ra2_var.get(), lbl_stats.cget("text"))
 )
 btn_exportar.pack(pady=5)
+
+# botão de exportar CSV com os moradores filtrados pela RA Principal
+# filtrar_ra() vem do calcular.py, o mesmo usado internamente pelas outras funções de estatística
+btn_exportar_csv = tk.Button(
+    tab_graficos,
+    text="Exportar CSV Filtrado",
+    command=lambda: exportar_csv_filtrado(filtrar_ra(df_moradores, ra1_var.get()), ra1_var.get())
+)
+btn_exportar_csv.pack(pady=5)
 
 # Frame que vai segurar os desenhos do Matplotlib
 # frames são necessários para organizar os widgets dentro da janela do Tkinter, e não haver conflito de posicionamento
