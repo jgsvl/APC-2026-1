@@ -5,20 +5,27 @@ import time
 # Cria um logger específico para este arquivo (ele herda a configuração do sistema.py)
 logger = logging.getLogger(__name__)
 
-def carregar_dados():
-    """Carrega os dataframes, remove valores sentinela e mapeia as RAs dinamicamente."""
+def carregar_dados(caminho_moradores, caminho_domicilios, caminho_dicionario):
+    """Carrega os dataframes a partir dos caminhos escolhidos pelo usuário, remove valores sentinela e mapeia as RAs dinamicamente."""
     tempo_inicio = time.time() # marca o tempo de início do carregamento, para medir performance
     logger.info("Carregando os arquivos")
     # lê o arquivo CSV com os dados dos moradores
     # sep=";" e decimal="," garantem que o Pandas entenda o formato brasileiro
     # low_memory=False lê o arquivo inteiro de uma vez, evitando avisos de tipos mistos
-    logger.info("Lendo moradores.csv")
-    moradores = pd.read_csv("dados/moradores.csv", sep=";", decimal=",", low_memory=False)
+    logger.info(f"Lendo {caminho_moradores}")
+    moradores = pd.read_csv(caminho_moradores, sep=";", decimal=",", low_memory=False)
     
 
-    # lê o arquivo Excel com os dados dos domicílios, porém ainda não é usado no sistema
-    logger.info("Lendo domicilios.xlsx")
-    domicilios = pd.read_excel("dados/domicilios.xlsx")
+    # lê o arquivo Excel com os dados dos domicílios
+    logger.info(f"Lendo {caminho_domicilios}")
+    domicilios = pd.read_excel(caminho_domicilios)
+
+    # No Excel, a coluna A01nficha vem formatada como TEXTO (ex: "00001"), enquanto no
+    # CSV de moradores o Pandas já lê como número inteiro (1). Sem essa conversão, o
+    # pd.merge() entre as duas tabelas não casaria nenhuma linha, pois "00001" (texto)
+    # != 1 (número) para o Pandas. Convertemos os dois lados para o mesmo tipo (int)
+    # aqui, uma única vez, para que qualquer merge feito depois já funcione direto.
+    domicilios['A01nficha'] = domicilios['A01nficha'].astype(str).str.strip().astype(int)
     
     
     # filtra os moradores para remover valores sentinela (99999 e 88888) de idade, gênero e escolaridade
@@ -38,7 +45,6 @@ def carregar_dados():
     # fortemente acoplados com o arquivo do dicionário, então se ele mudar de nome ou de formato, 
     # o programa vai quebrar.
     logger.info("Iniciando leitura do dicionário de variáveis para mapear as RAs...")
-    caminho_dicionario = "dados/dicionario_de_variaveis_pdada_2024_público.xlsx"
     planilha_dicionario = pd.read_excel(caminho_dicionario, sheet_name="anexo_1")
     
     # Pega a coluna 'Valor' (códigos numéricos) e a 'Descrição do valor' (nomes em texto)

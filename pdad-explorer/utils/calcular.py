@@ -26,6 +26,41 @@ def calcular_stats(df, ra):
     
     return total_pessoas, media_idade
 
+def calcular_acesso_internet(df_moradores, df_domicilios, ra):
+    """Faz merge com os domicílios (D3) e calcula o % de acesso à internet, comparando responsáveis com e sem superior completo."""
+    # Pega só os responsáveis pelo domicílio (E04 == 1) da RA escolhida, pois é a pessoa
+    # que representa o domicílio na hora de cruzar com os dados de infraestrutura
+    responsaveis = filtrar_ra(df_moradores, ra)
+    responsaveis = responsaveis[responsaveis['E04'] == 1]
+
+    # Trava de segurança: sem responsáveis nessa RA, não há o que cruzar
+    if len(responsaveis) == 0:
+        return 0.0, 0.0, 0.0
+
+    # pd.merge() cruza a tabela de moradores (responsáveis) com a de domicílios,
+    # trazendo a coluna C05 (acesso à internet) usando A01nficha como chave comum -> Diferencial D3
+    cruzado = responsaveis.merge(df_domicilios[['A01nficha', 'C05']], on='A01nficha', how='left')
+
+    # Filtra a sentinela 88888 ("Não sabe") da coluna de internet antes de calcular percentuais
+    cruzado = cruzado[cruzado['C05'] != 88888]
+
+    if len(cruzado) == 0:
+        return 0.0, 0.0, 0.0
+
+    # C05: 1 = "Sim, próprio" e 2 = "Sim, compartilhado" contam como "tem acesso à internet"
+    tem_internet = cruzado['C05'].isin([1, 2])
+    pct_geral = tem_internet.mean() * 100
+
+    # Separa entre responsáveis com superior completo (escolaridade == 7) e os demais
+    com_superior = cruzado[cruzado['escolaridade'] == 7]
+    sem_superior = cruzado[cruzado['escolaridade'] != 7]
+
+    pct_com_superior = com_superior['C05'].isin([1, 2]).mean() * 100 if len(com_superior) > 0 else 0.0
+    pct_sem_superior = sem_superior['C05'].isin([1, 2]).mean() * 100 if len(sem_superior) > 0 else 0.0
+
+    return pct_geral, pct_com_superior, pct_sem_superior
+
+
 def preparar_graficos(df, ra1, ra2):
     """
     Prepara e contabiliza os dados que serão injetados no Matplotlib.
