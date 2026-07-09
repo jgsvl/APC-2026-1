@@ -1,3 +1,4 @@
+import logging
 import tkinter as tk # Biblioteca base para a interface gráfica
 from tkinter import ttk # Widgets mais modernos (abas, combobox)
 import matplotlib.pyplot as plt # Biblioteca para gerar os gráficos
@@ -7,6 +8,26 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg # Conecta o grá
 from utils.carregar import carregar_dados
 from utils.calcular import calcular_stats, preparar_graficos
 from utils.exportar import exportar_relatorio
+
+# configura o logging para exibir mensagens de informação no console, ao invés de usar print() espalhados pelo código
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - [%(levelname)s] - %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S"
+)
+
+logger = logging.getLogger(__name__)
+
+# Mensagem de boas-vindas no console, usando ASCII art. o "r" antes da 
+# string indica que é uma raw string, então não precisamos escapar as barras invertidas.
+print(r"""
+     ____.                       ________      ___.         .__       .__   
+    |    | _________    ____    /  _____/_____ \_ |_________|__| ____ |  |  
+    |    |/  _ \__  \  /  _ \  /   \  ___\__  \ | __ \_  __ \  |/ __ \|  |  
+/\__|    (  <_> ) __ \(  <_> ) \    \_\  \/ __ \| \_\ \  | \/  \  ___/|  |__
+\________|\____(____  /\____/   \______  (____  /___  /__|  |__|\___  >____/
+                    \/                 \/     \/    \/              \/       
+            """)
 
 # Lê os arquivos e salva o dataframe pronto.
 df_moradores, df_domicilios = carregar_dados()
@@ -89,6 +110,8 @@ canvas_atual = None
 # função de atualização da tela, que é chamada sempre que o usuário muda algum filtro
 def atualizar():
     """Lê os filtros, refaz as contas e redesenha a tela toda vez que o usuário interage."""
+
+    # canvas_atual é uma variável global, então precisamos declarar que vamos usá-la dentro da função
     global canvas_atual
     
     # Pega o texto que o usuário escolheu
@@ -111,6 +134,7 @@ def atualizar():
     lbl_stats.config(text=texto)
 
     # atualiza gráficos
+    # usa canvas_atual para controlar o gráfico atual na tela, e apagar o antigo antes de desenhar o novo
     if canvas_atual:
         canvas_atual.get_tk_widget().destroy() # Apaga o gráfico velho
         
@@ -151,4 +175,5 @@ ra2_var.bind("<<ComboboxSelected>>", lambda e: atualizar())
 atualizar() 
 
 # Roda o programa e mantém a janela aberta
+# mainloop() é o loop principal do Tkinter, que mantém a janela aberta e escuta eventos do usuário
 root.mainloop()
