@@ -7,9 +7,9 @@ import matplotlib.pyplot as plt # Biblioteca para gerar os gráficos
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg # Conecta o gráfico na tela do Tkinter
 
 # Importa as nossas próprias funções criadas na pasta utils
-from utils.carregar import carregar_dados
-from utils.calcular import calcular_stats, preparar_graficos, calcular_acesso_internet, filtrar_ra
-from utils.exportar import exportar_relatorio, exportar_csv_filtrado
+import utils.carregar
+import utils.calcular
+import utils.exportar
 
 # configura o logging para exibir mensagens de informação no console, ao invés de usar print() espalhados pelo código
 logging.basicConfig(
@@ -20,8 +20,9 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
-# Mensagem de boas-vindas no console, usando ASCII art. o "r" antes da 
-# string indica que é uma raw string, então não precisamos escapar as barras invertidas.
+# mensagem de boas-vindas no console, usando ASCII art.
+# o "r" antes da string indica que é uma raw string, então
+# não precisamos escapar as barras invertidas.
 print(r"""
      ____.                       ________      ___.         .__       .__   
     |    | _________    ____    /  _____/_____ \_ |_________|__| ____ |  |  
@@ -41,7 +42,7 @@ def escolher_arquivo(variavel_destino, titulo, tipos):
 
 def tela_selecao_arquivos():
     """Abre uma janela inicial para o usuário escolher os 3 arquivos antes do sistema carregar os dados."""
-
+    logger.info("Aguardando o upload dos arquivos")
     janela_selecao = tk.Tk()
     janela_selecao.title("Explorador PDAD - Selecionar Arquivos")
     janela_selecao.geometry("620x300")
@@ -58,7 +59,7 @@ def tela_selecao_arquivos():
     var_dicionario = tk.StringVar(value="")
 
     # Dicionário que vai guardar o resultado final, depois que a janela for fechada.
-    # Usamos um dicionário (e não variáveis soltas) porque as funções internas (confirmar/verificar)
+    # Usamos um dicionário, e não variáveis soltas, porque as funções internas (confirmar/verificar)
     # precisam escrever nesse valor e ele precisa "sobreviver" depois do janela_selecao.destroy()
     resultado = {}
 
@@ -121,7 +122,7 @@ def tela_selecao_arquivos():
     if not resultado:
         logger.info("Nenhum arquivo selecionado. Encerrando o programa.")
         sys.exit()
-
+    logger.info("Upload de arquivos finalizado")
     return resultado
 
 
@@ -129,7 +130,7 @@ def tela_selecao_arquivos():
 caminhos = tela_selecao_arquivos()
 
 # Lê os arquivos escolhidos pelo usuário e salva o dataframe pronto.
-df_moradores, df_domicilios = carregar_dados(
+df_moradores, df_domicilios = utils.carregar.carregar_dados(
     caminhos["moradores"], caminhos["domicilios"], caminhos["dicionario"]
 )
 
@@ -195,7 +196,7 @@ lbl_stats.pack(pady=10)
 btn_exportar = tk.Button(
     tab_graficos, 
     text="Exportar Relatório (.txt)", 
-    command=lambda: exportar_relatorio(df_moradores, ra1_var.get(), ra2_var.get(), lbl_stats.cget("text"))
+    command=lambda: utils.exportar.exportar_relatorio(df_moradores, ra1_var.get(), ra2_var.get(), lbl_stats.cget("text"))
 )
 btn_exportar.pack(pady=5)
 
@@ -204,7 +205,7 @@ btn_exportar.pack(pady=5)
 btn_exportar_csv = tk.Button(
     tab_graficos,
     text="Exportar CSV Filtrado",
-    command=lambda: exportar_csv_filtrado(filtrar_ra(df_moradores, ra1_var.get()), ra1_var.get())
+    command=lambda: utils.exportar.exportar_csv_filtrado(utils.calcular.filtrar_ra(df_moradores, ra1_var.get()), ra1_var.get())
 )
 btn_exportar_csv.pack(pady=5)
 
@@ -238,9 +239,9 @@ def atualizar():
         ra2_var.set("Nenhuma")
 
     # atualiza texto
-    t1, med1 = calcular_stats(df_moradores, r1)
+    t1, med1 = utils.calcular.calcular_stats(df_moradores, r1)
     # calcular_acesso_internet cruza (merge) moradores e domicílios -> gera a 3ª estatística e o Diferencial D3
-    net1, net_sup1, net_semsup1 = calcular_acesso_internet(df_moradores, df_domicilios, r1)
+    net1, net_sup1, net_semsup1 = utils.calcular.calcular_acesso_internet(df_moradores, df_domicilios, r1)
     texto = (
         f"[{r1}] -> Total: {t1} adultos | Média Idade: {med1:.1f} anos\n"
         f"[{r1}] -> Domicílios c/ internet: {net1:.1f}% "
@@ -248,8 +249,8 @@ def atualizar():
     )
     
     if r2 != "Nenhuma":
-        t2, med2 = calcular_stats(df_moradores, r2)
-        net2, net_sup2, net_semsup2 = calcular_acesso_internet(df_moradores, df_domicilios, r2)
+        t2, med2 = utils.calcular.calcular_stats(df_moradores, r2)
+        net2, net_sup2, net_semsup2 = utils.calcular.calcular_acesso_internet(df_moradores, df_domicilios, r2)
         texto += (
             f"\n[{r2}] -> Total: {t2} adultos | Média Idade: {med2:.1f} anos"
             f"\n[{r2}] -> Domicílios c/ internet: {net2:.1f}% "
@@ -270,7 +271,7 @@ def atualizar():
         plt.close(figura_atual)
 
     # Puxa os dados traduzidos do calcular.py
-    barras, pizza = preparar_graficos(df_moradores, r1, r2)
+    barras, pizza = utils.calcular.preparar_graficos(df_moradores, r1, r2)
     
     # Cria os dois espaços de gráfico (1 linha, 2 colunas). O de barras fica mais largo (2 para 1)
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 4.5), gridspec_kw={'width_ratios': [2, 1]})
