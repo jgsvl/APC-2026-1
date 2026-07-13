@@ -245,7 +245,7 @@ def atualizar():
     texto = (
         f"[{r1}] -> Total: {t1} adultos | Média Idade: {med1:.1f} anos\n"
         f"[{r1}] -> Domicílios c/ internet: {net1:.1f}% "
-        f"(responsável c/ superior: {net_sup1:.1f}% | sem superior: {net_semsup1:.1f}%)"
+     #   f"(responsável c/ superior: {net_sup1:.1f}% | sem superior: {net_semsup1:.1f}%)"
     )
     
     if r2 != "Nenhuma":
