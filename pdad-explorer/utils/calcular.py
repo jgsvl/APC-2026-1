@@ -2,7 +2,7 @@ import pandas as pd
 
 def filtrar_ra(df, ra):
     """
-    Função que filtra a base de dados pela Região Administrativa (RA) escolhida.
+    Função que filtra a base de dados pela Região Administrativa escolhida.
     """
     # Se a opção selecionada for "Todas", o sistema retorna a base de dados completa, sem cortes.
     if ra == "Todas":
@@ -13,21 +13,23 @@ def filtrar_ra(df, ra):
 
 def calcular_stats(df, ra):
     """
-    Calcula as estatísticas numéricas exigidas no Requisito 4 do projeto.
+    Calcula as estatísticas.
     """
     df_ra = filtrar_ra(df, ra)
     
     # Trava de segurança: se o filtro não encontrar ninguém, retorna zero, para não ocorrer / por zero.
     if len(df_ra) == 0: 
         return 0, 0.0
-        
+    
+    # pega o total de pessoas (len() da lista) e faz a média de idades (.mean()) automaticamente 
+    # a partir da coluna idade_calculada
     total_pessoas = len(df_ra)
     media_idade = df_ra['idade_calculada'].mean()
     
     return total_pessoas, media_idade
 
 def calcular_acesso_internet(df_moradores, df_domicilios, ra):
-    """Faz merge com os domicílios (D3) e calcula o % de acesso à internet, comparando responsáveis com e sem superior completo."""
+    """Faz merge com os domicílios e calcula o % de acesso à internet, comparando responsáveis com e sem superior completo."""
     # Pega só os responsáveis pelo domicílio (E04 == 1) da RA escolhida, pois é a pessoa
     # que representa o domicílio na hora de cruzar com os dados de infraestrutura
     responsaveis = filtrar_ra(df_moradores, ra)
