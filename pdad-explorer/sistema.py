@@ -1,17 +1,18 @@
-import logging
-import sys
+import logging # biblioteca para exibir mensagens de log no console, ao invés de print() espalhados pelo código
 import tkinter as tk # Biblioteca base para a interface gráfica
 from tkinter import ttk # Widgets mais modernos (abas, combobox)
-from tkinter import filedialog # Diálogo de seleção de arquivos (Requisito de upload via GUI)
+
 import matplotlib.pyplot as plt # Biblioteca para gerar os gráficos
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg # Conecta o gráfico na tela do Tkinter
 
 # Importa as nossas próprias funções criadas na pasta utils
-import utils.carregar
-import utils.calcular
-import utils.exportar
-
-# configura o logging para exibir mensagens de informação no console, ao invés de usar print() espalhados pelo código
+import utils.carregar as carregar
+import utils.calcular as calcular
+import utils.exportar as exportar
+import system.arte_console as arte
+import system.upload_de_arquivos as upload
+# configura o logging para exibir mensagens de informação no console com data e hora, 
+# ao invés de usar print() espalhados pelo código
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - [%(levelname)s] - %(message)s",
@@ -20,117 +21,14 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
-# mensagem de boas-vindas no console, usando ASCII art.
-# o "r" antes da string indica que é uma raw string, então
-# não precisamos escapar as barras invertidas.
-print(r"""
-     ____.                       ________      ___.         .__       .__   
-    |    | _________    ____    /  _____/_____ \_ |_________|__| ____ |  |  
-    |    |/  _ \__  \  /  _ \  /   \  ___\__  \ | __ \_  __ \  |/ __ \|  |  
-/\__|    (  <_> ) __ \(  <_> ) \    \_\  \/ __ \| \_\ \  | \/  \  ___/|  |__
-\________|\____(____  /\____/   \______  (____  /___  /__|  |__|\___  >____/
-                    \/                 \/     \/    \/              \/       
-            """)
-
-def escolher_arquivo(variavel_destino, titulo, tipos):
-    """Abre o diálogo de seleção de arquivo e guarda o caminho escolhido na variável de tela."""
-    caminho = filedialog.askopenfilename(title=titulo, filetypes=tipos)
-    # Se o usuário cancelar o diálogo, askopenfilename devolve string vazia, então não sobrescrevemos nada
-    if caminho:
-        variavel_destino.set(caminho)
-
-
-def tela_selecao_arquivos():
-    """Abre uma janela inicial para o usuário escolher os 3 arquivos antes do sistema carregar os dados."""
-    logger.info("Aguardando o upload dos arquivos")
-    janela_selecao = tk.Tk()
-    janela_selecao.title("Explorador PDAD - Selecionar Arquivos")
-    janela_selecao.geometry("620x300")
-
-    tk.Label(
-        janela_selecao,
-        text="Selecione os arquivos de dados do PDAD 2024",
-        font=("Arial", 13, "bold")
-    ).pack(pady=(15, 10))
-
-    # Guarda os caminhos escolhidos como texto, para exibir na tela e habilitar o botão de carregar
-    var_moradores = tk.StringVar(value="")
-    var_domicilios = tk.StringVar(value="")
-    var_dicionario = tk.StringVar(value="")
-
-    # Dicionário que vai guardar o resultado final, depois que a janela for fechada.
-    # Usamos um dicionário, e não variáveis soltas, porque as funções internas (confirmar/verificar)
-    # precisam escrever nesse valor e ele precisa "sobreviver" depois do janela_selecao.destroy()
-    resultado = {}
-
-    def montar_linha(rotulo, variavel, titulo_dialogo, tipos):
-        """Monta uma linha padrão de 'rótulo + caminho escolhido + botão Procurar' na tela de seleção."""
-        frame_linha = tk.Frame(janela_selecao)
-        frame_linha.pack(fill="x", padx=20, pady=8)
-
-        tk.Label(frame_linha, text=rotulo, width=16, anchor="w").pack(side="left")
-
-        # Entry "readonly" só para mostrar o caminho escolhido; o usuário não digita nele diretamente
-        entrada = tk.Entry(frame_linha, textvariable=variavel, state="readonly", width=45)
-        entrada.pack(side="left", padx=5)
-
-        tk.Button(
-            frame_linha,
-            text="Procurar...",
-            command=lambda: escolher_arquivo(variavel, titulo_dialogo, tipos)
-        ).pack(side="left")
-
-    montar_linha("Moradores (.csv):", var_moradores, "Selecione o arquivo de Moradores",
-                 [("Arquivo CSV", "*.csv")])
-    montar_linha("Domicílios (.xlsx):", var_domicilios, "Selecione o arquivo de Domicílios",
-                 [("Arquivo Excel", "*.xlsx")])
-    montar_linha("Dicionário (.xlsx):", var_dicionario, "Selecione o Dicionário de Variáveis",
-                 [("Arquivo Excel", "*.xlsx")])
-
-    def confirmar_selecao():
-        """Salva os caminhos escolhidos em 'resultado' e fecha a tela de seleção."""
-        resultado["moradores"] = var_moradores.get()
-        resultado["domicilios"] = var_domicilios.get()
-        resultado["dicionario"] = var_dicionario.get()
-        janela_selecao.destroy()
-
-    btn_iniciar = tk.Button(
-        janela_selecao,
-        text="Carregar Sistema",
-        font=("Arial", 11, "bold"),
-        state="disabled",
-        command=confirmar_selecao
-    )
-    btn_iniciar.pack(pady=20)
-
-    def verificar_completo(*args):
-        """Habilita o botão 'Carregar Sistema' somente quando os 3 arquivos tiverem sido escolhidos."""
-        if var_moradores.get() and var_domicilios.get() and var_dicionario.get():
-            btn_iniciar.config(state="normal")
-        else:
-            btn_iniciar.config(state="disabled")
-
-    # trace_add dispara verificar_completo() toda vez que uma das 3 variáveis mudar de valor
-    var_moradores.trace_add("write", verificar_completo)
-    var_domicilios.trace_add("write", verificar_completo)
-    var_dicionario.trace_add("write", verificar_completo)
-
-    janela_selecao.mainloop()
-
-    # Se o usuário fechar a janela no "X" sem escolher os arquivos, 'resultado' fica vazio.
-    # Nesse caso encerramos o programa em vez de tentar carregar dados que não existem.
-    if not resultado:
-        logger.info("Nenhum arquivo selecionado. Encerrando o programa.")
-        sys.exit()
-    logger.info("Upload de arquivos finalizado")
-    return resultado
-
+# Imprime o banner do sistema no console
+arte.imprime_banner()
 
 # Abre a tela de seleção de arquivos e só prossegue depois que o usuário escolher os 3 arquivos
-caminhos = tela_selecao_arquivos()
+caminhos = upload.tela_selecao_arquivos()
 
 # Lê os arquivos escolhidos pelo usuário e salva o dataframe pronto.
-df_moradores, df_domicilios = utils.carregar.carregar_dados(
+df_moradores, df_domicilios = carregar.carregar_dados(
     caminhos["moradores"], caminhos["domicilios"], caminhos["dicionario"]
 )
 
@@ -196,7 +94,7 @@ lbl_stats.pack(pady=10)
 btn_exportar = tk.Button(
     tab_graficos, 
     text="Exportar Relatório (.txt)", 
-    command=lambda: utils.exportar.exportar_relatorio(df_moradores, ra1_var.get(), ra2_var.get(), lbl_stats.cget("text"))
+    command=lambda: exportar.exportar_relatorio(df_moradores, ra1_var.get(), ra2_var.get(), lbl_stats.cget("text"))
 )
 btn_exportar.pack(pady=5)
 
@@ -205,7 +103,7 @@ btn_exportar.pack(pady=5)
 btn_exportar_csv = tk.Button(
     tab_graficos,
     text="Exportar CSV Filtrado",
-    command=lambda: utils.exportar.exportar_csv_filtrado(utils.calcular.filtrar_ra(df_moradores, ra1_var.get()), ra1_var.get())
+    command=lambda: exportar.exportar_csv_filtrado(calcular.filtrar_ra(df_moradores, ra1_var.get()), ra1_var.get())
 )
 btn_exportar_csv.pack(pady=5)
 
@@ -239,9 +137,9 @@ def atualizar():
         ra2_var.set("Nenhuma")
 
     # atualiza texto
-    t1, med1 = utils.calcular.calcular_stats(df_moradores, r1)
+    t1, med1 = calcular.calcular_stats(df_moradores, r1)
     # calcular_acesso_internet cruza (merge) moradores e domicílios -> gera a 3ª estatística e o Diferencial D3
-    net1, net_sup1, net_semsup1 = utils.calcular.calcular_acesso_internet(df_moradores, df_domicilios, r1)
+    net1, net_sup1, net_semsup1 = calcular.calcular_acesso_internet(df_moradores, df_domicilios, r1)
     texto = (
         f"[{r1}] -> Total: {t1} adultos | Média Idade: {med1:.1f} anos\n"
         f"[{r1}] -> Domicílios c/ internet: {net1:.1f}% "
@@ -249,8 +147,8 @@ def atualizar():
     )
     
     if r2 != "Nenhuma":
-        t2, med2 = utils.calcular.calcular_stats(df_moradores, r2)
-        net2, net_sup2, net_semsup2 = utils.calcular.calcular_acesso_internet(df_moradores, df_domicilios, r2)
+        t2, med2 = calcular.calcular_stats(df_moradores, r2)
+        net2, net_sup2, net_semsup2 = calcular.calcular_acesso_internet(df_moradores, df_domicilios, r2)
         texto += (
             f"\n[{r2}] -> Total: {t2} adultos | Média Idade: {med2:.1f} anos"
             f"\n[{r2}] -> Domicílios c/ internet: {net2:.1f}% "
@@ -271,7 +169,7 @@ def atualizar():
         plt.close(figura_atual)
 
     # Puxa os dados traduzidos do calcular.py
-    barras, pizza = utils.calcular.preparar_graficos(df_moradores, r1, r2)
+    barras, pizza = calcular.preparar_graficos(df_moradores, r1, r2)
     
     # Cria os dois espaços de gráfico (1 linha, 2 colunas). O de barras fica mais largo (2 para 1)
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 4.5), gridspec_kw={'width_ratios': [2, 1]})

@@ -50,6 +50,8 @@ def calcular_acesso_internet(df_moradores, df_domicilios, ra):
         return 0.0, 0.0, 0.0
 
     # C05: 1 = "Sim, próprio" e 2 = "Sim, compartilhado" contam como "tem acesso à internet"
+    # isin é uma função do Pandas que retorna uma série booleana, 
+    # True se o valor estiver na lista [1, 2], False caso contrário
     tem_internet = cruzado['C05'].isin([1, 2])
     pct_geral = tem_internet.mean() * 100
 
