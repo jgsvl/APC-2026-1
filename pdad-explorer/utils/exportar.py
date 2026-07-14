@@ -1,6 +1,6 @@
 from tkinter import filedialog, messagebox
 
-def exportar_relatorio(df, ra1, ra2, texto_stats):
+def exportar_relatorio(df, ra1, ra2, genero, texto_estatisticas):
     """
     Gera um arquivo .txt com os dados selecionados e as estatísticas exibidas na tela.
     """
@@ -14,16 +14,16 @@ def exportar_relatorio(df, ra1, ra2, texto_stats):
     
     # Se o caminho for diferente de vazio, prossegue com a escrita
     if arquivo != "":
-        # Abre o arquivo em modo de escrita ('w')
+        # Abre o arquivo em modo de escrita ('w' = write))
         # 'utf-8' garante que acentos e caracteres especiais sejam salvos corretamente
         f = open(arquivo, "w", encoding="utf-8")
         
-        f.write("--- RELATÓRIO DE PERFIL EDUCACIONAL PDAD 2024 ---\n\n")
-        f.write(f"Filtros aplicados:\nRA Principal: {ra1}\nRA Comparação: {ra2}\n\n")
+        f.write("--- Perfil educacional por Região Administrativa ---\n\n")
+        f.write(f"Filtros aplicados:\nRA Principal: {ra1}\nRA Comparação: {ra2}\nGênero: {genero}\n\n")
         f.write("--- Estatísticas ---\n")
-        f.write(texto_stats + "\n\n")
+        f.write(texto_estatisticas + "\n\n")
         f.write("--- Observação ---\n")
-        f.write("Dados filtrados de sentinelas (99999 e 88888).\n")
+        f.write("Dados do tipo \"não sabe\"/\"não se aplica\" com relação à idade calculada, gênero e escolaridade foram filtrados.\n")
         
         f.close() # Fecha o arquivo para liberar a memória
         
