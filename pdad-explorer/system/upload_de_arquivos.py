@@ -7,7 +7,12 @@ from tkinter import filedialog # pacote necesssário para janela de seleção de
 logger = logging.getLogger(__name__)
 
 def escolher_arquivo(variavel_destino, titulo, tipos):
-    """Abre o diálogo de seleção de arquivo e guarda o caminho escolhido na variável de tela."""
+    """Abre o diálogo de seleção de arquivo e guarda o caminho escolhido na variável de tela.
+    :param variavel_destino: tk.StringVar() que vai receber o caminho do arquivo escolhido
+    :param titulo: título que vai ser exibido da janela de diálogo
+    :param tipos: lista de tuplas (nome, extensão do arquivo) com os tipos de arquivo aceitos, ex:
+        [("Arquivo CSV", "*.csv"), ("Arquivo Excel", "*.xlsx")] 
+    """
     caminho = filedialog.askopenfilename(title=titulo, filetypes=tipos)
     # Se o usuário cancelar o diálogo, askopenfilename devolve string vazia, então não sobrescrevemos nada
     if caminho:
