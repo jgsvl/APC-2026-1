@@ -1,3 +1,7 @@
+"""Módulo principal do sistema de exploração de dados do PDAD 2024, recorte A - Perfil educacional por Região Administrativa."""
+__author__ = "João Gabriel da Silva Vidal"
+__email__ = "jgsvl@outlook.com"
+
 import logging # biblioteca para exibir mensagens de log no console, ao invés de print() espalhados pelo código
 import tkinter as tk # Biblioteca base para a interface gráfica
 from tkinter import ttk # Widgets mais modernos (abas, combobox)
@@ -11,6 +15,7 @@ import utils.calcular as calcular
 import utils.exportar as exportar
 import system.arte_console as arte
 import system.upload_de_arquivos as upload
+
 # configura o logging para exibir mensagens de informação no console com data e hora, 
 # ao invés de usar print() espalhados pelo código
 logging.basicConfig(
@@ -40,8 +45,8 @@ opcoes_ra = ["Todas"] + sorted(list(df_moradores['nome_ra'].unique()))
 
 # constroi a janela principal
 root = tk.Tk()
-root.title("Explorador PDAD - Perfil educacional por Região Administrativa")
-root.geometry("950x650") # Largura x Altura
+root.title("Explorador PDAD - Recorte A - Perfil educacional por Região Administrativa")
+root.geometry("1000x600") # Largura x Altura
 
 # Cria o sistema de abas e expande para ocupar a tela toda
 # ttk.Notebook() é o widget que cria abas internas e coloca no root, que é a janela principal
