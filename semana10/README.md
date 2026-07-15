@@ -1,18 +1,7 @@
 # Exercicios C
 
 
-
-## 1. Estrutura de um programa
-
-```c
-#include <stdio.h>
-
-int main(void) {
-    return 0; 
-}
-```
-
-## Olá mundo
+### Olá mundo
 
 
 ```c
@@ -25,20 +14,8 @@ int main(void) {
 ```
 ---
 
-## 2. Tipos primitivos e tamanhos
 
-| Tipo     | Tamanho típico | Exemplo literal |
-|----------|----------------|-----------------|
-| `char`   | 1 byte         | `'A'`, `'\n'`   |
-| `int`    | 4 bytes        | `42`, `-7`      |
-| `long`   | 4–8 bytes      | `100000L`       |
-| `float`  | 4 bytes        | `3.14f`         |
-| `double` | 8 bytes        | `3.14159`       |
-| `_Bool`  | 1 byte         | `0` / `1`       |
-
-Modificadores: `unsigned`, `signed`, `short`, `long`
-
-### 🔬 Exercício 2 — Inspecionando tamanhos
+### Inspecionando tamanhos
 
 ```c
 #include <stdio.h>
@@ -53,57 +30,30 @@ int main(void) {
 }
 ```
 
-**O que observar:** os valores impressos confirmam a tabela acima.
-Tente mudar `sizeof(int)` para `sizeof(short)` e compare.
-
 ---
 
-## 3. Declaração e inicialização
-
-```c
-int x;           // declaração (valor indefinido!)
-int y = 10;      // inicialização
-const int N = 5; // constante (read-only)
-```
-
-### 🔬 Exercício 3 — Variável não inicializada vs. inicializada
+### variável não inicializada vs. inicializada
 
 ```c
 #include <stdio.h>
 
 int main(void) {
     int a = 42;
-    int b;          /* valor lixo — NÃO leia antes de atribuir */
+    int b;         
     b = a + 8;
     printf("a = %d\n", a);
     printf("b = %d\n", b);
 
     const int N = 100;
-    /* N = 200; */  /* descomente para ver o erro de compilacao */
+    N = 200;
     printf("N = %d\n", N);
     return 0;
 }
 ```
-
-**O que observar:** o valor de `a` aparece imediatamente no frame; `b` só recebe valor
-após a atribuição. Tente descomentar `N = 200` e veja o erro.
-
 ---
 
-## 4. Operadores
 
-```
-Aritméticos:   +  -  *  /  %
-Relacionais:   ==  !=  <  >  <=  >=
-Lógicos:       &&  ||  !
-Bit a bit:     &  |  ^  ~  <<  >>
-Atribuição:    =  +=  -=  *=  /=  %=
-Incremento:    ++x  x++  --x  x--
-Ternário:      cond ? a : b
-Sizeof:        sizeof(tipo)
-```
-
-### 🔬 Exercício 4 — Divisão inteira, módulo e incremento
+### Divisão inteira, módulo e incremento
 
 ```c
 #include <stdio.h>
@@ -125,24 +75,10 @@ int main(void) {
 }
 ```
 
-**O que observar:** diferença entre pré e pós-incremento no valor retornado; resultado
-da divisão inteira vs. real.
-
 ---
 
-## 5. Controle de fluxo
 
-```c
-if (x > 0) { ... } else if (x == 0) { ... } else { ... }
-
-switch (op) { case '+': ...; break; default: break; }
-
-while (cond) { ... }
-do { ... } while (cond);
-for (int i = 0; i < n; i++) { ... }
-```
-
-### 🔬 Exercício 5a — if / else if / else
+###  if / else if / else
 
 ```c
 #include <stdio.h>
@@ -159,12 +95,9 @@ int main(void) {
 }
 ```
 
-**Variação:** troque `nota` por 55, 80 e 95; execute cada versão e acompanhe qual
-ramo é percorrido.
-
 ---
 
-### 🔬 Exercício 5b — for com break e continue
+### for com break e continue
 
 ```c
 #include <stdio.h>
@@ -179,12 +112,9 @@ int main(void) {
 }
 ```
 
-**O que observar:** o valor de `i` no frame a cada passo; quando `continue` pula a
-impressão e quando `break` encerra o laço.
-
 ---
 
-### 🔬 Exercício 5c — do-while
+### do-while
 
 ```c
 #include <stdio.h>
@@ -199,12 +129,9 @@ int main(void) {
 }
 ```
 
-**O que observar:** o corpo executa *antes* do teste; `n` dobra a cada iteração
-(potências de 2).
-
 ---
 
-### 🔬 Exercício 5d — switch com fall-through
+### switch com fall-through
 
 ```c
 #include <stdio.h>
@@ -225,26 +152,10 @@ int main(void) {
     return 0;
 }
 ```
-
-**O que observar:** o *fall-through* intencional agrupa casos; remova um `break` para
-ver o comportamento inesperado.
-
 ---
 
-## 6. Funções
 
-```c
-int soma(int a, int b);          // protótipo
-
-int soma(int a, int b) {         // definição
-    return a + b;
-}
-
-void dobra(int *x) { *x *= 2; } // passagem por referência
-dobra(&valor);
-```
-
-### 🔬 Exercício 6 — Pilha de chamadas em ação
+### pilha de chamadas em ação
 
 ```c
 #include <stdio.h>
@@ -266,24 +177,10 @@ int main(void) {
     return 0;
 }
 ```
-
-**O que observar:** os frames de `fatorial` empilhando e desempilhando; como `dobra`
-modifica `v` via ponteiro — o frame de `dobra` mostra `x` apontando para `v` em `main`.
-
 ---
 
-## 7. Arrays
 
-```c
-int v[5];                         // 5 ints (índices 0–4)
-int v[3] = {10, 20, 30};
-int m[2][3] = {{1,2,3},{4,5,6}};  // matriz 2×3
-v[0] = 42;
-```
-
-> ⚠ C não verifica limites em tempo de execução.
-
-### 🔬 Exercício 7 — Array unidimensional e matriz
+###  Array unidimensional e matriz
 
 ```c
 #include <stdio.h>
@@ -304,23 +201,9 @@ int main(void) {
 }
 ```
 
-**O que observar:** o PythonTutor mostra o array como células numeradas; acompanhe
-`soma` acumulando a cada iteração.
-
 ---
 
-## 8. Strings
-
-```c
-char s[] = "hello";      // 6 bytes: h e l l o \0
-char *p  = "hello";      // ponteiro para literal (imutável)
-
-strlen(s)        // comprimento sem '\0'
-strcpy(dst, src) // cópia
-strcmp(a, b)     // 0 se iguais
-```
-
-### 🔬 Exercício 8 — Percorrendo uma string caractere a caractere
+### Percorrendo uma string caractere a caractere
 
 ```c
 #include <stdio.h>
@@ -343,26 +226,10 @@ int main(void) {
 }
 ```
 
-**O que observar:** o array `s` no frame de `main` com cada byte; o `'\0'` invisível
-no último índice (valor 0). Compare com `char *p = "Brasilia"` — o PythonTutor mostra
-`p` como uma seta para fora do frame (memória estática).
-
 ---
 
-## 9. Ponteiros
 
-```c
-int  x = 10;
-int *p = &x;    // p guarda o endereço de x
-*p = 20;        // derreferência: altera x via p
-
-// Aritmética de ponteiros
-int v[] = {1, 2, 3};
-int *p = v;
-p++;            // aponta para v[1]
-```
-
-### 🔬 Exercício 9a — Ponteiro básico e derreferência
+###  Ponteiro básico e de referência
 
 ```c
 #include <stdio.h>
@@ -381,14 +248,9 @@ int main(void) {
     return 0;
 }
 ```
-
-**O que observar:** no PythonTutor, `p` é exibido como uma **seta** apontando para a
-caixa de `x`. Após `*p = 99`, a caixa de `x` muda de valor sem que `x` apareça no
-lado esquerdo da atribuição.
-
 ---
 
-### 🔬 Exercício 9b — Aritmética de ponteiros e equivalência com índice
+### Aritmética de ponteiros e equivalência com índice
 
 ```c
 #include <stdio.h>
@@ -407,11 +269,9 @@ int main(void) {
 }
 ```
 
-**O que observar:** a seta de `p` se mover entre os elementos do array a cada `p++`.
-
 ---
 
-### 🔬 Exercício 9c — Ponteiro para ponteiro
+###  Ponteiro para ponteiro
 
 ```c
 #include <stdio.h>
@@ -430,24 +290,9 @@ int main(void) {
     return 0;
 }
 ```
-
-**O que observar:** duas setas encadeadas — `pp → p → x`.
-
 ---
 
-## 10. Alocação dinâmica
-
-```c
-#include <stdlib.h>
-
-int *p = malloc(n * sizeof(int));
-if (!p) { /* erro */ }
-
-free(p);
-p = NULL;
-```
-
-### 🔬 Exercício 10 — Heap vs. Stack
+### Heap vs Stack
 
 ```c
 #include <stdio.h>
@@ -468,28 +313,9 @@ int main(void) {
     return 0;
 }
 ```
-
-**O que observar:** no PythonTutor, o bloco alocado aparece no painel **Heap** (lado
-direito), separado do frame da stack. Após `free`, ele desaparece do heap.
-
 ---
 
-## 11. Structs e Unions
-
-```c
-struct Ponto { int x; int y; };
-struct Ponto p = {3, 4};
-p.x = 10;
-
-typedef struct { float re; float im; } Complexo;
-
-struct Ponto *pp = &p;
-pp->x = 5;   /* equivale a (*pp).x = 5 */
-
-union Data { int i; float f; char c; };
-```
-
-### 🔬 Exercício 11a — Struct com acesso direto e via ponteiro
+### Struct com acesso direto e via ponteiro
 
 ```c
 #include <stdio.h>
@@ -520,13 +346,9 @@ int main(void) {
     return 0;
 }
 ```
-
-**O que observar:** `origem` e `p` como caixas compostas no frame; `ptr` como seta
-para `p`; `->` equivalendo a `(*ptr).x`.
-
 ---
 
-### 🔬 Exercício 11b — Union: membros compartilham memória
+### Union: membros compartilham memória
 
 ```c
 #include <stdio.h>
@@ -549,19 +371,7 @@ int main(void) {
 }
 ```
 
-**O que observar:** o PythonTutor mostra um único bloco de memória; escrever em `d.f`
-sobrescreve o mesmo espaço de `d.i`.
-
----
-
-## 12. Enums
-
-```c
-typedef enum { DOM=0, SEG, TER, QUA, QUI, SEX, SAB } DiaSemana;
-DiaSemana hoje = TER;   /* vale 2 */
-```
-
-### 🔬 Exercício 12 — Enum com switch
+### enum com switch
 
 ```c
 #include <stdio.h>
@@ -587,26 +397,9 @@ int main(void) {
     return 0;
 }
 ```
-
-**O que observar:** enum é tratado como `int`; o laço `for` itera incrementando o
-valor numérico subjacente.
-
 ---
 
-## 13. Entrada / Saída básica
-
-```c
-printf("x = %d, f = %.2f\n", x, f);
-scanf("%d %f", &x, &f);   // &: passa endereço!
-
-// %d int   %ld long   %f float   %lf double
-// %c char  %s string  %p ponteiro  %x hex
-```
-
-### 🔬 Exercício 13 — Formatação de saída (sem scanf no PythonTutor)
-
-> ℹ️ O PythonTutor não suporta entrada interativa via `scanf`.
-> Use valores literais para testar a formatação.
+### Formatação de saída 
 
 ```c
 #include <stdio.h>
@@ -626,23 +419,9 @@ int main(void) {
     return 0;
 }
 ```
-
-**O que observar:** como `%x` mostra 255 como `ff`; `%p` mostra o endereço de `s`.
-
 ---
 
-## 14. Pré-processador
-
-```c
-#define PI  3.14159
-#define MAX(a,b) ((a)>(b)?(a):(b))  // macro com parâmetros
-
-#ifdef DEBUG
-    printf("debug: x=%d\n", x);
-#endif
-```
-
-### 🔬 Exercício 14 — Constante e macro com parâmetro
+### constante e macro com parâmetro
 
 ```c
 #include <stdio.h>
@@ -663,22 +442,9 @@ int main(void) {
     return 0;
 }
 ```
-
-**O que observar:** macros são substituição textual — o PythonTutor mostra o código
-**após** a expansão do pré-processador. Tente `MAX(a++, b)` para ver o efeito colateral.
-
 ---
 
-## 15. Escopo e duração
-
-| Classe         | Declaração          | Duração       | Escopo       |
-|----------------|---------------------|---------------|--------------|
-| automática     | dentro da função    | bloco         | local        |
-| `static` local | dentro da função    | todo programa | local        |
-| `static` global| fora de funções     | todo programa | arquivo .c   |
-| `extern`       | fora / referência   | todo programa | múltiplos .c |
-
-### 🔬 Exercício 15a — Escopo de bloco
+### Escopo de bloco
 
 ```c
 #include <stdio.h>
@@ -696,13 +462,9 @@ int main(void) {
     return 0;
 }
 ```
-
-**O que observar:** o `x` interno aparece no frame apenas enquanto o bloco `{}` está
-ativo; ao sair, o frame volta a enxergar o `x` externo.
-
 ---
 
-### 🔬 Exercício 15b — Variável `static` local (persiste entre chamadas)
+### Variável `static` local
 
 ```c
 #include <stdio.h>
@@ -721,21 +483,7 @@ int main(void) {
 }
 ```
 
-**O que observar:** `n` não é recriado a cada chamada — o PythonTutor o mostra como
-variável **global** (fora do frame), mesmo sendo declarado dentro da função.
-
----
-
-## 16. Boas práticas resumidas
-
-- Inicialize todas as variáveis antes de usar.
-- Prefira `strncpy` / `snprintf` a `strcpy` / `sprintf`.
-- Sempre verifique o retorno de `malloc` / `fopen`.
-- Todo `malloc` deve ter um `free` correspondente.
-- Compile com `-Wall -Wextra -fsanitize=address` durante o desenvolvimento.
-- Use `const` sempre que um ponteiro/variável não deve ser modificado.
-
-### 🔬 Exercício 16 — Detectando estouro de buffer (simulação segura)
+### Detectando estouro de buffer
 
 ```c
 #include <stdio.h>
@@ -753,13 +501,3 @@ int main(void) {
     return 0;
 }
 ```
-
-**O que observar:** `destino` tem 8 bytes; `strncpy` copia no máximo 7 caracteres +
-`'\0'`. No PythonTutor, veja como o array é preenchido byte a byte e truncado.
-
----
-
-> **Dica de uso no PythonTutor:**
-> - Ative **"Show all frames"** para ver funções recursivas empilhando.
-> - Ative **"Render memory"** → "Show in compact mode" para arrays grandes.
-> - Use o link **"Generate permanent link"** para salvar e compartilhar um exercício.
